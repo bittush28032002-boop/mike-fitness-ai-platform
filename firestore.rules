@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function getUserData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isAdmin() { return isSignedIn() && getUserData().role == 'admin'; }
+    
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Validation Helpers ---
+    function isValidUser(data) {
+      return data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 256
+        && data.role in ['user', 'admin']
+        && (data.keys().hasAll(['uid', 'email', 'role']) && data.keys().size() >= 3);
+    }
+
+    function isValidLead(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 256
+        && data.goal is string && data.goal.size() <= 500
+        && data.status in ['new', 'contacted', 'converted', 'lost']
+        && data.createdAt == request.time;
+    }
+
+    function isValidWorkoutLog(data, userId) {
+      return (data.userId == userId || !('userId' in data))
+        && data.date is string && data.date.size() == 10
+        && data.exercises is list && data.exercises.size() <= 50
+        && (data.createdAt is timestamp || !('createdAt' in data));
+    }
+
+    function isValidMealPlan(data, userId) {
+      return data.userId == userId
+        && data.date is string && data.date.size() > 0
+        && data.meals is list && data.meals.size() >= 1 && data.meals.size() <= 10
+        && data.totalCalories is number
+        && (data.goal is string || !('goal' in data))
+        && (data.calories is number || !('calories' in data))
+        && (data.dietaryNote is string || !('dietaryNote' in data))
+        && (data.createdAt is timestamp || !('createdAt' in data));
+    }
+
+    // --- Match Groups ---
+
+    // User Profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) 
+        && isValidUser(incoming()) 
+        && incoming().role == 'user'; // Users cannot self-assign admin
+      allow update: if isOwner(userId) 
+        && isValidUser(incoming())
+        && (
+          // Allow self-update of non-RBAC fields
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio', 'weightGoal'])
+          || isAdmin() // Admin can update anything including role
+        );
+    }
+
+    // Leads (Consultation Requests)
+    match /leads/{leadId} {
+      allow create: if isValidId(leadId) && isValidLead(incoming());
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // Workout Logs
+    match /users/{userId}/workoutLogs/{logId} {
+      allow get: if isOwner(userId) && isValidId(logId);
+      allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+      allow delete: if isOwner(userId) && isValidId(logId);
+      allow create, update: if isOwner(userId) && isValidId(logId) && isValidWorkoutLog(incoming(), userId);
+    }
+
+    // Meal Plans
+    match /users/{userId}/mealPlans/{planId} {
+      allow get: if isOwner(userId) && isValidId(planId);
+      allow list: if isOwner(userId) && resource.data.userId == request.auth.uid;
+      allow delete: if isOwner(userId) && isValidId(planId);
+      allow create: if isOwner(userId) && isValidId(planId) && isValidMealPlan(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(planId) && isValidMealPlan(incoming(), userId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['meals', 'totalCalories', 'dietaryNote', 'goal', 'calories']);
+    }
+
+    // Training Plans (Public catalog)
+    match /trainingPlans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

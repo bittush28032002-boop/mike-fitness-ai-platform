@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Public and private profile of the user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "createdAt": { "type": "number" },
+        "bio": { "type": "string" },
+        "weightGoal": { "type": "number" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Lead": {
+      "title": "Booking Lead",
+      "description": "Contact and consultation requests",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "goal": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "contacted", "converted", "lost"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "email", "goal", "status", "createdAt"]
+    },
+    "WorkoutLog": {
+      "title": "Workout Log",
+      "description": "Daily workout logs for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "sets": { "type": "number" },
+              "reps": { "type": "number" },
+              "weight": { "type": "number" }
+            }
+          }
+        }
+      },
+      "required": ["userId", "date", "exercises"]
+    },
+    "MealPlan": {
+      "title": "Meal Plan",
+      "description": "Generated meal plans for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "meals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] },
+              "description": { "type": "string" },
+              "calories": { "type": "number" }
+            }
+          }
+        }
+      },
+      "required": ["userId", "date", "meals"]
+    },
+    "TrainingPlan": {
+      "title": "Training Plan",
+      "description": "Available training programs",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "duration": { "type": "string" },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "price", "duration"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data"
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Consultation requests from potential clients"
+    },
+    "/users/{userId}/workoutLogs/{logId}": {
+      "schema": "WorkoutLog",
+      "description": "User's training logs"
+    },
+    "/users/{userId}/mealPlans/{planId}": {
+      "schema": "MealPlan",
+      "description": "User's nutrition plans"
+    },
+    "/trainingPlans/{planId}": {
+      "schema": "TrainingPlan",
+      "description": "Catalog of available fitness programs"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Mike Johnson Fitness",
+  "description": "Premium personal training and fitness coaching in Los Angeles. Transform your body with customized workout plans, elite nutrition, and AI-powered coaching.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "AI-powered fitness coaching",
+    "Real-time progress tracking",
+    "Secure membership management",
+    "Interactive workout dashboard"
+  ]
+}

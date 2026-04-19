@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@theme {
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --color-neon: #ccff00;
+  --color-luxury-black: #050505;
+  --color-luxury-gray: #121212;
+  --color-luxury-light-gray: #222222;
+
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  --color-background: var(--color-luxury-black);
+  --color-foreground: #ffffff;
+  --color-card: var(--color-luxury-gray);
+  --color-card-foreground: #ffffff;
+  --color-popover: var(--color-luxury-gray);
+  --color-popover-foreground: #ffffff;
+  --color-primary: var(--color-neon);
+  --color-primary-foreground: #000000;
+  --color-secondary: var(--color-luxury-light-gray);
+  --color-secondary-foreground: #ffffff;
+  --color-muted: var(--color-luxury-light-gray);
+  --color-muted-foreground: #a0a0a0;
+  --color-accent: var(--color-neon);
+  --color-accent-foreground: #000000;
+  --color-border: var(--color-luxury-light-gray);
+  --color-input: var(--color-luxury-light-gray);
+  --color-ring: var(--color-neon);
+  
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-color: var(--color-luxury-black);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-black tracking-tighter uppercase;
+  }
+}
+
+/* Theme Specific Utilities */
+.sleek-hero-text {
+  font-size: clamp(48px, 8vw, 84px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sleek-stat-card {
+  @apply bg-luxury-gray border border-border p-5 rounded-lg;
+}
+
+.sleek-program-card {
+  @apply bg-luxury-gray border-l-4 border-neon p-6 flex justify-between items-center transition-all hover:bg-white/5 cursor-pointer;
+}
+
+.sleek-consult-box {
+  @apply bg-neon text-black p-6 rounded-xl space-y-4;
+}
+
+.sleek-btn-primary {
+  @apply bg-neon text-black px-6 py-3 font-bold text-xs uppercase tracking-widest rounded transition-all hover:scale-[1.02] active:scale-[0.98];
+}
+
+.neon-glow {
+  box-shadow: 0 0 20px rgba(204, 255, 0, 0.2);
+}
+
+.text-neon {
+  color: var(--color-neon);
+}
+
+.text-dim {
+  @apply text-muted-foreground;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(204, 255, 0, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(204, 255, 0, 0.5);
+}
+
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
